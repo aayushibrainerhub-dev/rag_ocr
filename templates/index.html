@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCR-RAG File Extractor</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        background: #f7f7fb;
+        color: #1f2937;
+      }
+      .card {
+        max-width: 760px;
+        margin: auto;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      }
+      label, select, input, button {
+        display: block;
+        width: 100%;
+        margin-top: 0.75rem;
+      }
+      select, input, button {
+        padding: 0.7rem;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+      }
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-top: 1rem;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 8px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Upload a file to extract text</h1>
+
+      <form id="upload-form">
+        <label for="file_type">Choose a file extension</label>
+        <select id="file_type" name="file_type" required>
+          <option value="json">JSON</option>
+          <option value="txt">TXT</option>
+          <option value="pdf">PDF</option>
+          <option value="docx">DOCX</option>
+          <option value="pptx">PPTX</option>
+          <option value="jpg">JPG</option>
+          <option value="jpeg">JPEG</option>
+          <option value="png">PNG</option>
+        </select>
+
+        <label for="file">Select file</label>
+        <input id="file" name="file" type="file" required />
+
+        <button type="submit">Extract Text</button>
+      </form>
+
+      <h2>Extracted text</h2>
+      <pre id="result">No extraction has run yet.</pre>
+    </div>
+
+    <script>
+      const uploadForm = document.getElementById('upload-form');
+      const resultBox = document.getElementById('result');
+
+      uploadForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(uploadForm);
+
+        try {
+          const response = await fetch('/extract', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.detail || 'Extraction failed.');
+          }
+
+          resultBox.textContent = data.extracted_text || 'No text was found in the selected file.';
+        } catch (error) {
+          resultBox.textContent = error.message;
+        }
+      });
+    </script>
+  </body>
+</html>
